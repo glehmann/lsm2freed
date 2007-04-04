@@ -1,6 +1,21 @@
 import itk, sys, os
 # itk.auto_progress()
 
+# the destination dir
+destDir = sys.argv[1] + "/"
+
+# helper function to create the directories like mkdir -p
+def mkdir( path ):
+	p = ""
+	for d in path.split("/") :
+		p += d + "/"
+		if not os.path.exists( p ):
+			os.mkdir( p )
+			
+def log( s ):
+	print s,
+	sys.stdout.flush()
+
 # the pipeline used to convert the lsm files to the a serie of tif used in freed
 reader = itk.lsm()
 writer = itk.ImageSeriesWriter.IUC3IUC2.New(reader)
@@ -22,23 +37,19 @@ RELPOSITION %(sliceSpacing)s;
 sliceDescriptorTpl = "SLICE %(sliceName)s %(fileName)s\n"
 
 # lets convert all the files
-for f in sys.argv[1:] :
+for f in sys.argv[2:] :
 	# display the file name, to know on what we are working
-	print f,
+	log( f )
 	
 	# change the file name
 	reader.SetFileName( f )
 	
 	numberOfSlices = itk.size( reader )[2]
 	spacing = itk.spacing( reader )
-	
 	lsmName = f[:-4]
-	if not os.path.exists(lsmName ):
-		os.mkdir( lsmName )
-		
-	descriptorDir = lsmName + "/sdf"
-	if not os.path.exists( descriptorDir ):
-		os.mkdir( descriptorDir )
+	
+	descriptorDir = "%s/%s/sdf" % ( destDir, lsmName )
+	mkdir( descriptorDir )
 		
 	# set the number of slices for the name generator
 	names.SetEndIndex( numberOfSlices - 1 )
@@ -48,11 +59,10 @@ for f in sys.argv[1:] :
 		channelName = reader.SetChannel( c )
 		
 		# again, print the channel name  to know what is done currently
-		print channelName,
+		log( channelName )
 		
-		channelDir = lsmName + "/" + channelName
-		if not os.path.exists( channelDir ):
-			os.mkdir( channelDir )
+		channelDir = "%s/%s/%s" % ( destDir, lsmName, channelName )
+		mkdir( channelDir )
 			
 		descriptor = descriptorHeaderTpl % { "channelName": channelName,
 						"imagePath": "../" + channelName,
@@ -70,7 +80,7 @@ for f in sys.argv[1:] :
 		descriptorFile.close()
 		
 		# generate the file names for the writer
-		nameFormat = "%s/%s/%%03d.tif" % ( lsmName, channelName )
+		nameFormat = "%s/%s/%s/%%03d.tif" % ( destDir, lsmName, channelName )
 # 		print nameFormat
 		names.SetSeriesFormat( nameFormat )
 		# and write the tif files
