@@ -34,7 +34,7 @@ PIXHEIGHT %(pixelHeight)s;
 RELPOSITION %(sliceSpacing)s;
 """
 # and a line per slice
-sliceDescriptorTpl = "SLICE %(sliceName)s %(fileName)s\n"
+sliceDescriptorTpl = "SLICE %(sliceName)s %(fileName)s;\n"
 
 # lets convert all the files
 for f in sys.argv[2:] :
