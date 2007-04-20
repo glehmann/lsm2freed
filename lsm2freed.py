@@ -18,7 +18,7 @@ def log( s ):
 
 # the pipeline used to convert the lsm files to the a serie of tif used in freed
 reader = itk.lsm()
-writer = itk.ImageSeriesWriter.IUC3IUC2.New(reader)
+writer = itk.ImageSeriesWriter.IUC3IUC2.New(reader, UseCompression=True)
 
 # the names must be generated with a NumericSeriesFileNames object, because the 
 # vector of strings are not usable yet from python
